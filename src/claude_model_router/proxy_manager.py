@@ -10,7 +10,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 
 def parse_proxy_url(proxy_url: str) -> Tuple[str, int, str]:
