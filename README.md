@@ -47,6 +47,15 @@ claude-model-router model
 claude-model-router claude
 ```
 
+**Shortcut:** Use `cmr` as shorthand for `claude-model-router`:
+
+```cmd
+cmr kimi
+cmr openai
+cmr model
+cmr claude
+```
+
 ## Configuration
 
 Create `model-router.config.json` in the project root:
