@@ -8,13 +8,13 @@ import subprocess
 import sys
 from typing import List, Optional
 
-# Handle both module and direct execution
-try:
-    from . import __version__
-except ImportError:
-    __version__ = "1.0.0"
+# Add parent directory to path for direct execution
+if __name__ == "__main__" and __package__ is None:
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from .config import (
+__version__ = "1.0.0"
+
+from claude_model_router.config import (
     CONFIG_KEYS,
     DEFAULT_OPENAI_BASE_URL,
     DEFAULT_OPENAI_CHAT_MODEL,
@@ -25,7 +25,7 @@ from .config import (
     load_config,
     normalize_value,
 )
-from .env import (
+from claude_model_router.env import (
     broadcast_env_change,
     delete_env_user,
     print_config_details,
@@ -33,8 +33,8 @@ from .env import (
     set_env_system,
     set_env_user,
 )
-from .ip_detect import auto_select_model, warn_openai_in_cn
-from .proxy_manager import ensure_proxy_running
+from claude_model_router.ip_detect import auto_select_model, warn_openai_in_cn
+from claude_model_router.proxy_manager import ensure_proxy_running
 
 CONFIG = load_config()
 ENV_BY_MODEL = build_env_by_model(CONFIG)
