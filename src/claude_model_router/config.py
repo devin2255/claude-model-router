@@ -63,7 +63,7 @@ def get_config_path() -> str:
     env_path = os.environ.get("MODEL_ROUTER_CONFIG")
     if env_path:
         return env_path
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "model-router.config.json")
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "model-router.config.json")
 
 
 def deep_merge(base: Dict[str, Any], override: Optional[Dict[str, Any]]) -> Dict[str, Any]:
@@ -110,7 +110,7 @@ def init_config_file() -> int:
     if directory and not os.path.exists(directory):
         os.makedirs(directory, exist_ok=True)
 
-    template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "model-router.config.example.json")
+    template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "config", "example.json")
     try:
         if os.path.exists(template_path):
             with open(template_path, "r", encoding="utf-8") as src:
