@@ -67,11 +67,11 @@ Create `model-router.config.json` in the project root:
   "models": {
     "kimi": {
       "anthropic_base_url": "https://api.moonshot.cn/anthropic",
-      "anthropic_auth_token": "YOUR_KIMI_API_KEY",
+      "anthropic_auth_token": "YOUR_KIMI_AUTH_TOKEN",
       "anthropic_model": "kimi-k2.5"
     },
     "openai": {
-      "anthropic_auth_token": "YOUR_OPENAI_API_KEY",
+      "anthropic_auth_token": "YOUR_OPENAI_AUTH_TOKEN",
       "anthropic_model": "gpt-5.2-codex"
     }
   }
