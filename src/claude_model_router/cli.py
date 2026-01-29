@@ -8,7 +8,12 @@ import subprocess
 import sys
 from typing import List, Optional
 
-from . import __version__
+# Handle both module and direct execution
+try:
+    from . import __version__
+except ImportError:
+    __version__ = "1.0.0"
+
 from .config import (
     CONFIG_KEYS,
     DEFAULT_OPENAI_BASE_URL,

@@ -5,7 +5,8 @@ setlocal
 :: Usage: cmr <command> [args...]
 
 set "SCRIPT_DIR=%~dp0"
-set "CLI_PY=%SCRIPT_DIR%..\src\claude_model_router\cli.py"
+set "SRC_DIR=%SCRIPT_DIR%..\src"
+set "CLI_PY=%SRC_DIR%\claude_model_router\cli.py"
 
 call :EnsurePython "%~1"
 if errorlevel 1 exit /b %errorlevel%
@@ -47,14 +48,16 @@ winget install -e --id Python.Python.3 --source winget
 exit /b %errorlevel%
 
 :RunScript
+:: Add src directory to PYTHONPATH for imports
+set "PYTHONPATH=%SRC_DIR%;%PYTHONPATH%"
 where /q python
 if not errorlevel 1 (
-    python -m claude_model_router.cli %*
+    python "%CLI_PY%" %*
     exit /b %errorlevel%
 )
 where /q py
 if not errorlevel 1 (
-    py -3 -m claude_model_router.cli %*
+    py -3 "%CLI_PY%" %*
     exit /b %errorlevel%
 )
 echo Python not found. Reopen terminal and retry.
