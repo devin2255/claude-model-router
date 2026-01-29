@@ -5,11 +5,18 @@
     "kimi": {
       "anthropic_base_url": "https://api.moonshot.cn/anthropic",
       "anthropic_auth_token": "REPLACE_ME",
-      "anthropic_model": "kimi-k2.5"
+      "anthropic_model": "kimi-k2.5",
+      "use_proxy": false
     },
     "openai": {
       "anthropic_auth_token": "REPLACE_ME",
-      "anthropic_model": "gpt-5.2-codex"
+      "anthropic_model": "gpt-5.2-codex",
+      "use_proxy": true
+    },
+    "openrouter": {
+      "anthropic_auth_token": "REPLACE_ME",
+      "anthropic_model": "anthropic/claude-3.5-sonnet",
+      "use_proxy": true
     }
   }
 }

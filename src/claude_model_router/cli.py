@@ -83,7 +83,10 @@ def configure_model(model: str) -> tuple:
     env_vars["MODEL_ROUTER_PROXY_URL"] = proxy_url
     env_vars["MODEL_ROUTER_OPENAI_BASE_URL"] = openai_base_url
 
-    if model == "openai":
+    # Check if this model needs proxy (based on config, not model name)
+    use_proxy = env_vars.pop("_USE_PROXY", False)
+
+    if use_proxy:
         env_vars["ANTHROPIC_BASE_URL"] = proxy_url
         openai_key = env_vars.get("ANTHROPIC_AUTH_TOKEN")
         if openai_key:
@@ -202,23 +205,26 @@ def run_claude_cli(args: List[str]) -> int:
         print("Current model: unknown (please run 'claude-model-router kimi|openai|model' first)")
     print_config_details(CONFIG_KEYS, "Current configuration:")
 
-    if active_model == "openai":
-        proxy_url = (
-            os.environ.get("MODEL_ROUTER_PROXY_URL")
-            or os.environ.get("ANTHROPIC_BASE_URL")
-            or DEFAULT_PROXY_URL
-        )
-        openai_base_url = resolve_openai_base_url()
-        _, proxy_message, resolved_proxy_url = ensure_proxy_running(
-            proxy_url,
-            openai_base_url,
-            force_restart=True,
-        )
-        if resolved_proxy_url and resolved_proxy_url != proxy_url:
-            os.environ["ANTHROPIC_BASE_URL"] = resolved_proxy_url
-            os.environ["MODEL_ROUTER_PROXY_URL"] = resolved_proxy_url
-        if proxy_message:
-            print(proxy_message)
+    # Check if active model needs proxy
+    if active_model and active_model in ENV_BY_MODEL:
+        use_proxy = ENV_BY_MODEL[active_model].get("_USE_PROXY", False)
+        if use_proxy:
+            proxy_url = (
+                os.environ.get("MODEL_ROUTER_PROXY_URL")
+                or os.environ.get("ANTHROPIC_BASE_URL")
+                or DEFAULT_PROXY_URL
+            )
+            openai_base_url = resolve_openai_base_url()
+            _, proxy_message, resolved_proxy_url = ensure_proxy_running(
+                proxy_url,
+                openai_base_url,
+                force_restart=True,
+            )
+            if resolved_proxy_url and resolved_proxy_url != proxy_url:
+                os.environ["ANTHROPIC_BASE_URL"] = resolved_proxy_url
+                os.environ["MODEL_ROUTER_PROXY_URL"] = resolved_proxy_url
+            if proxy_message:
+                print(proxy_message)
 
     command = ["claude", *args]
     if os.name == "nt":

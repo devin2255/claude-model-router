@@ -25,6 +25,7 @@ DEFAULT_CONFIG = {
             "anthropic_default_sonnet_model": "",
             "anthropic_default_haiku_model": "",
             "claude_code_subagent_model": "",
+            "use_proxy": False,
         },
         "openai": {
             "anthropic_base_url": "",
@@ -34,6 +35,7 @@ DEFAULT_CONFIG = {
             "anthropic_default_sonnet_model": "",
             "anthropic_default_haiku_model": "",
             "claude_code_subagent_model": "",
+            "use_proxy": True,
         },
     },
 }
@@ -166,7 +168,7 @@ def normalize_value(value: Any, fallback: str = "") -> str:
     return text if text else fallback
 
 
-def build_env_by_model(config: Dict[str, Any]) -> Dict[str, Dict[str, str]]:
+def build_env_by_model(config: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
     """Build environment variable mappings for each configured model."""
     proxy_url = normalize_value(config.get("proxy_url"), DEFAULT_PROXY_URL)
     models = config.get("models") or {}
@@ -174,12 +176,20 @@ def build_env_by_model(config: Dict[str, Any]) -> Dict[str, Dict[str, str]]:
 
     for name in list(models.keys()):
         model_cfg = dict(models.get(name) or {})
-        if name == "openai":
-            base_url = normalize_value(model_cfg.get("anthropic_base_url"), proxy_url)
+
+        # Check if this model needs proxy
+        use_proxy = model_cfg.get("use_proxy", False)
+
+        # Determine default model based on whether it uses proxy (OpenAI-style) or not
+        if use_proxy:
             default_model = DEFAULT_OPENAI_CHAT_MODEL
+            default_base_url = proxy_url
         else:
-            base_url = normalize_value(model_cfg.get("anthropic_base_url"), DEFAULT_KIMI_BASE_URL)
             default_model = DEFAULT_KIMI_MODEL
+            default_base_url = DEFAULT_KIMI_BASE_URL
+
+        # Use configured base_url if provided, otherwise use default
+        base_url = normalize_value(model_cfg.get("anthropic_base_url"), default_base_url)
 
         model_name = normalize_value(model_cfg.get("anthropic_model"), default_model)
 
@@ -194,6 +204,7 @@ def build_env_by_model(config: Dict[str, Any]) -> Dict[str, Dict[str, str]]:
             "ANTHROPIC_DEFAULT_SONNET_MODEL": pick("anthropic_default_sonnet_model"),
             "ANTHROPIC_DEFAULT_HAIKU_MODEL": pick("anthropic_default_haiku_model"),
             "CLAUDE_CODE_SUBAGENT_MODEL": pick("claude_code_subagent_model"),
+            "_USE_PROXY": use_proxy,  # Internal flag, not an env var
         }
 
     return env_by_model
