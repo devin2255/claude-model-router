@@ -1,0 +1,2 @@
+# claude-model-router
+# No external dependencies - uses only Python standard library

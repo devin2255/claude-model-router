@@ -1,0 +1,15 @@
+{
+  "proxy_url": "http://127.0.0.1:19000",
+  "openai_base_url": "https://api.openai.com/v1",
+  "models": {
+    "kimi": {
+      "anthropic_base_url": "https://api.moonshot.cn/anthropic",
+      "anthropic_auth_token": "REPLACE_ME",
+      "anthropic_model": "kimi-k2.5"
+    },
+    "openai": {
+      "anthropic_auth_token": "REPLACE_ME",
+      "anthropic_model": "gpt-5.2-codex"
+    }
+  }
+}

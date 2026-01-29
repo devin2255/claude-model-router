@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "claude-model-router"
+version = "1.0.0"
+description = "Windows CLI tool for Claude Code to switch between AI models and convert API protocols"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "claude-model-router contributors"}
+]
+keywords = ["claude", "claude-code", "ai", "llm", "router", "openai", "anthropic"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+]
+requires-python = ">=3.6"
+
+[project.scripts]
+claude-model-router = "claude_model_router.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/yourusername/claude-model-router"
+Repository = "https://github.com/yourusername/claude-model-router"
+Issues = "https://github.com/yourusername/claude-model-router/issues"
