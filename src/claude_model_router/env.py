@@ -98,7 +98,7 @@ def format_config_value(name: str, value: Optional[str]) -> str:
     """Format a configuration value for display."""
     if not value:
         return "(not set)"
-    if name in {"ANTHROPIC_AUTH_TOKEN", "OPENAI_API_KEY", "ANTHROPIC_API_KEY"}:
+    if name in {"ANTHROPIC_AUTH_TOKEN", "OPENAI_API_KEY"}:
         return mask_secret(value)
     return value
 

@@ -95,8 +95,9 @@ def configure_model(model: str) -> tuple:
         env_vars["ANTHROPIC_BASE_URL"] = proxy_url
         openai_key = env_vars.get("ANTHROPIC_AUTH_TOKEN")
         if openai_key:
+            # Only set OPENAI_API_KEY for the proxy to use
+            # Don't set ANTHROPIC_API_KEY to avoid conflict with ANTHROPIC_AUTH_TOKEN
             env_vars["OPENAI_API_KEY"] = openai_key
-            env_vars["ANTHROPIC_API_KEY"] = openai_key
         env_vars["OPENAI_BASE_URL"] = openai_base_url
         env_vars["OPENAI_API_BASE"] = openai_base_url
         apply_openai_model_defaults(env_vars, openai_base_url)
