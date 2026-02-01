@@ -12,6 +12,9 @@ DEFAULT_OPENAI_CHAT_MODEL = "gpt-5.2-codex"
 DEFAULT_OPENAI_LIGHT_MODEL = "gpt-5.2-codex"
 DEFAULT_KIMI_BASE_URL = "https://api.moonshot.cn/anthropic"
 DEFAULT_KIMI_MODEL = "kimi-k2.5"
+DEFAULT_NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
+DEFAULT_NVIDIA_KIMI_MODEL = "moonshotai/kimi-k2.5"
+DEFAULT_NVIDIA_GLM_MODEL = "z-ai/glm4.7"
 
 DEFAULT_CONFIG = {
     "proxy_url": DEFAULT_PROXY_URL,
@@ -28,6 +31,7 @@ DEFAULT_CONFIG = {
             "use_proxy": False,
         },
         "openai": {
+            "openai_base_url": DEFAULT_OPENAI_BASE_URL,
             "anthropic_base_url": "",
             "anthropic_auth_token": "",
             "anthropic_model": DEFAULT_OPENAI_CHAT_MODEL,
@@ -36,6 +40,28 @@ DEFAULT_CONFIG = {
             "anthropic_default_haiku_model": "",
             "claude_code_subagent_model": "",
             "use_proxy": True,
+        },
+        "nvidia-kimi": {
+            "openai_base_url": DEFAULT_NVIDIA_BASE_URL,
+            "anthropic_base_url": DEFAULT_NVIDIA_BASE_URL,
+            "anthropic_auth_token": "",
+            "anthropic_model": DEFAULT_NVIDIA_KIMI_MODEL,
+            "anthropic_default_opus_model": "",
+            "anthropic_default_sonnet_model": "",
+            "anthropic_default_haiku_model": "",
+            "claude_code_subagent_model": "",
+            "use_proxy": False,
+        },
+        "nvidia-glm": {
+            "openai_base_url": DEFAULT_NVIDIA_BASE_URL,
+            "anthropic_base_url": DEFAULT_NVIDIA_BASE_URL,
+            "anthropic_auth_token": "",
+            "anthropic_model": DEFAULT_NVIDIA_GLM_MODEL,
+            "anthropic_default_opus_model": "",
+            "anthropic_default_sonnet_model": "",
+            "anthropic_default_haiku_model": "",
+            "claude_code_subagent_model": "",
+            "use_proxy": False,
         },
     },
 }

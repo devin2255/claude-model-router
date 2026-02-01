@@ -1,6 +1,5 @@
 {
   "proxy_url": "http://127.0.0.1:19000",
-  "openai_base_url": "https://api.openai.com/v1",
   "models": {
     "kimi": {
       "anthropic_base_url": "https://api.moonshot.cn/anthropic",
@@ -9,14 +8,24 @@
       "use_proxy": false
     },
     "openai": {
+      "openai_base_url": "https://api.openai.com/v1",
       "anthropic_auth_token": "REPLACE_ME",
       "anthropic_model": "gpt-5.2-codex",
       "use_proxy": true
     },
-    "openrouter": {
+    "nvidia-kimi": {
+      "openai_base_url": "https://integrate.api.nvidia.com/v1",
+      "anthropic_base_url": "https://integrate.api.nvidia.com/v1",
       "anthropic_auth_token": "REPLACE_ME",
-      "anthropic_model": "anthropic/claude-3.5-sonnet",
-      "use_proxy": true
+      "anthropic_model": "moonshotai/kimi-k2.5",
+      "use_proxy": false
+    },
+    "nvidia-glm": {
+      "openai_base_url": "https://integrate.api.nvidia.com/v1",
+      "anthropic_base_url": "https://integrate.api.nvidia.com/v1",
+      "anthropic_auth_token": "REPLACE_ME",
+      "anthropic_model": "z-ai/glm4.7",
+      "use_proxy": false
     }
   }
 }

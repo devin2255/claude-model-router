@@ -36,28 +36,31 @@ from claude_model_router.env import (
 from claude_model_router.ip_detect import auto_select_model, warn_openai_in_cn
 from claude_model_router.proxy_manager import ensure_proxy_running
 
-CONFIG = load_config()
-ENV_BY_MODEL = build_env_by_model(CONFIG)
 
-
-def resolve_proxy_url() -> str:
+def resolve_proxy_url(config: dict) -> str:
     """Resolve the proxy URL from environment or config."""
     proxy_url = os.environ.get("MODEL_ROUTER_PROXY_URL")
     if proxy_url:
         return proxy_url.rstrip("/")
-    config_url = CONFIG.get("proxy_url")
+    config_url = config.get("proxy_url")
     if config_url:
         return str(config_url).rstrip("/")
     return DEFAULT_PROXY_URL
 
 
-def resolve_openai_base_url() -> str:
-    """Resolve the OpenAI base URL from environment or config."""
-    base_url = os.environ.get("MODEL_ROUTER_OPENAI_BASE_URL") or os.environ.get("OPENAI_BASE_URL")
+def resolve_openai_base_url(config: dict, model_cfg: Optional[dict] = None) -> str:
+    """Resolve the OpenAI base URL from config or environment."""
+    base_url = None
+    if model_cfg:
+        base_url = model_cfg.get("openai_base_url")
     if not base_url:
-        base_url = os.environ.get("OPENAI_API_BASE")
+        base_url = (
+            os.environ.get("MODEL_ROUTER_OPENAI_BASE_URL")
+            or os.environ.get("OPENAI_BASE_URL")
+            or os.environ.get("OPENAI_API_BASE")
+        )
     if not base_url:
-        base_url = CONFIG.get("openai_base_url")
+        base_url = config.get("openai_base_url")
     if not base_url:
         base_url = DEFAULT_OPENAI_BASE_URL
     return base_url.rstrip("/")
@@ -79,12 +82,13 @@ def apply_openai_model_defaults(env_vars: dict, openai_base_url: str) -> None:
         env_vars["CLAUDE_CODE_SUBAGENT_MODEL"] = DEFAULT_OPENAI_LIGHT_MODEL
 
 
-def configure_model(model: str) -> tuple:
+def configure_model(model: str, config: dict, env_by_model: dict) -> tuple:
     """Configure environment for the specified model."""
-    env_vars = dict(ENV_BY_MODEL[model])
+    env_vars = dict(env_by_model[model])
     proxy_message = None
-    proxy_url = resolve_proxy_url()
-    openai_base_url = resolve_openai_base_url()
+    proxy_url = resolve_proxy_url(config)
+    model_cfg = (config.get("models") or {}).get(model, {})
+    openai_base_url = resolve_openai_base_url(config, model_cfg)
     env_vars["MODEL_ROUTER_PROXY_URL"] = proxy_url
     env_vars["MODEL_ROUTER_OPENAI_BASE_URL"] = openai_base_url
 
@@ -125,10 +129,10 @@ def configure_model(model: str) -> tuple:
     return system_ok, proxy_message
 
 
-def detect_active_model() -> Optional[str]:
+def detect_active_model(model_names: List[str]) -> Optional[str]:
     """Detect which model is currently active."""
     active = os.environ.get("MODEL_ROUTER_ACTIVE_MODEL")
-    if active in ENV_BY_MODEL:
+    if active in model_names:
         return active
     base_url = os.environ.get("ANTHROPIC_BASE_URL", "").strip().lower()
     if "moonshot.cn" in base_url:
@@ -138,7 +142,7 @@ def detect_active_model() -> Optional[str]:
     return None
 
 
-def parse_args(argv: List[str]):
+def parse_args(argv: List[str], model_names: List[str]):
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         description="Choose model and update environment variables.",
@@ -147,7 +151,7 @@ def parse_args(argv: List[str]):
     parser.add_argument(
         "model",
         nargs="?",
-        choices=sorted(ENV_BY_MODEL.keys()),
+        choices=model_names,
         help="Model name: see config models",
     )
     parser.add_argument(
@@ -155,7 +159,7 @@ def parse_args(argv: List[str]):
         "--model",
         "-m",
         dest="model_opt",
-        choices=sorted(ENV_BY_MODEL.keys()),
+        choices=model_names,
         help="Model name: see config models",
     )
     parser.add_argument(
@@ -199,10 +203,10 @@ def prompt_select_model(model_names: List[str]) -> Optional[str]:
         print("Invalid input, please try again.")
 
 
-def run_claude_cli(args: List[str]) -> int:
+def run_claude_cli(args: List[str], config: dict, env_by_model: dict) -> int:
     """Run the Claude CLI with current configuration."""
     refresh_env_from_registry(CONFIG_KEYS)
-    active_model = detect_active_model()
+    active_model = detect_active_model(sorted(env_by_model.keys()))
     if active_model:
         print(f"Current model: {active_model}")
     else:
@@ -210,15 +214,16 @@ def run_claude_cli(args: List[str]) -> int:
     print_config_details(CONFIG_KEYS, "Current configuration:")
 
     # Check if active model needs proxy
-    if active_model and active_model in ENV_BY_MODEL:
-        use_proxy = ENV_BY_MODEL[active_model].get("_USE_PROXY", False)
+    if active_model and active_model in env_by_model:
+        use_proxy = env_by_model[active_model].get("_USE_PROXY", False)
         if use_proxy:
             proxy_url = (
                 os.environ.get("MODEL_ROUTER_PROXY_URL")
                 or os.environ.get("ANTHROPIC_BASE_URL")
                 or DEFAULT_PROXY_URL
             )
-            openai_base_url = resolve_openai_base_url()
+            model_cfg = (config.get("models") or {}).get(active_model, {})
+            openai_base_url = resolve_openai_base_url(config, model_cfg)
             _, proxy_message, resolved_proxy_url = ensure_proxy_running(
                 proxy_url,
                 openai_base_url,
@@ -241,11 +246,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
 
-    if argv and argv[0].lower() == "claude":
-        return run_claude_cli(argv[1:])
-
     if argv and argv[0].lower() == "init":
         return init_config_file()
+
+    config = load_config()
+    env_by_model = build_env_by_model(config)
+    model_names = sorted(env_by_model.keys())
+
+    if argv and argv[0].lower() == "claude":
+        return run_claude_cli(argv[1:], config, env_by_model)
 
     if argv and argv[0].lower() == "model":
         if len(argv) > 1:
@@ -253,7 +262,6 @@ def main(argv: Optional[List[str]] = None) -> int:
             print("Use `claude-model-router <model-name>` to specify manually.")
             return 2
 
-        model_names = sorted(ENV_BY_MODEL.keys())
         selected = None
         if sys.stdin.isatty():
             selected = prompt_select_model(model_names)
@@ -264,7 +272,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             print("No available models found. Please configure models first.")
             return 1
 
-        system_ok, proxy_message = configure_model(selected)
+        system_ok, proxy_message = configure_model(selected, config, env_by_model)
         if proxy_message:
             print(proxy_message)
         if system_ok:
@@ -276,11 +284,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         print_config_details(CONFIG_KEYS, "Updated configuration:")
         return 0
 
-    args = parse_args(argv)
+    args = parse_args(argv, model_names)
     if args.model == "openai":
         args.model = warn_openai_in_cn()
 
-    system_ok, proxy_message = configure_model(args.model)
+    system_ok, proxy_message = configure_model(args.model, config, env_by_model)
     if proxy_message:
         print(proxy_message)
     if system_ok:
